@@ -19,29 +19,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hackhawks.pashulens.ui.theme.DarkBlue
 import com.hackhawks.pashulens.ui.theme.PashuLensTheme
 
-// --- Data for our dropdowns ---
 private val speciesList = listOf("Cow", "Buffalo")
 private val genderList = listOf("Male", "Female")
 private val lactationList = listOf("Heifer (not yet calved)", "First Lactation", "Mid-Lactation", "Late Lactation", "Dry")
 private val statusList = listOf("Healthy", "Needs Attention", "Sick")
-
 private val breedData = mapOf(
-    "Cow" to listOf(
-        "Gir", "Sahiwal", "Red Sindhi", "Tharparkar", "Kankrej", "Ongole", "Hariana", "Rathi", "Deoni", "Nagori",
-        "Holstein Friesian (HF)", "Jersey", "Brown Swiss", "Ayrshire", "Guernsey",
-        "HF Crossbred", "Jersey Crossbred", "Other Crossbred"
-    ),
-    "Buffalo" to listOf(
-        "Murrah", "Mehsana", "Nili-Ravi", "Surti", "Jaffarabadi", "Banni", "Pandharpuri", "Nagpuri"
-    )
+    "Cow" to listOf("Gir", "Sahiwal", "Red Sindhi", "Tharparkar", "Kankrej", "Ongole", "Hariana", "Rathi", "Deoni", "Nagori", "Holstein Friesian (HF)", "Jersey", "Brown Swiss", "Ayrshire", "Guernsey", "HF Crossbred", "Jersey Crossbred", "Other Crossbred"),
+    "Buffalo" to listOf("Murrah", "Mehsana", "Nili-Ravi", "Surti", "Jaffarabadi", "Banni", "Pandharpuri", "Nagpuri")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnimalScreen(
+    viewModel: AnimalViewModel,
     onBackClicked: () -> Unit,
     onSubmitSuccess: () -> Unit
 ) {
@@ -102,7 +96,25 @@ fun AddAnimalScreen(
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(value = lastVacDate, onValueChange = { lastVacDate = it }, label = { Text("Last Vaccination Date") }, modifier = Modifier.fillMaxWidth(), trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = "Select Date") })
             Spacer(modifier = Modifier.height(32.dp))
-            Button(onClick = onSubmitSuccess, modifier = Modifier.fillMaxWidth().height(50.dp), colors = ButtonDefaults.buttonColors(containerColor = DarkBlue)) {
+            Button(
+                onClick = {
+                    viewModel.addAnimal(
+                        tagId = tagId,
+                        animalName = "Cow", // You can update this to be a text field if needed
+                        species = selectedSpecies,
+                        breed = selectedBreed,
+                        gender = selectedGender,
+                        lactationStage = selectedLactation,
+                        weightKg = weight,
+                        ageMonths = age,
+                        farmId = farmId,
+                        status = selectedStatus,
+                        onSuccess = onSubmitSuccess
+                    )
+                },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = DarkBlue)
+            ) {
                 Text("Submit Now")
             }
         }
@@ -176,6 +188,6 @@ private fun PhotoUploadBox() {
 @Composable
 fun AddAnimalScreenPreview() {
     PashuLensTheme {
-        AddAnimalScreen(onBackClicked = {}, onSubmitSuccess = {})
+        AddAnimalScreen(viewModel(), onBackClicked = {}, onSubmitSuccess = {})
     }
 }

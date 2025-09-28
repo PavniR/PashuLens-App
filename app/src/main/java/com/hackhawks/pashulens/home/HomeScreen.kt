@@ -48,7 +48,7 @@ fun HomeScreen(navController: NavController) {
                         )
                         .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 54.dp)
                 ) {
-                    Text(text = "Good morning, Ravi!", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(text = "Good morning!", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
                     Text(text = "Let's check your livestock today", style = MaterialTheme.typography.bodyLarge, color = Color.White.copy(alpha = 0.8f))
                     Spacer(modifier = Modifier.height(24.dp))
                     OutlinedTextField(

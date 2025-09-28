@@ -2,6 +2,7 @@ package com.hackhawks.pashulens.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hackhawks.pashulens.ui.theme.DarkBlue
 import com.hackhawks.pashulens.ui.theme.PashuLensTheme
+import kotlinx.coroutines.launch
 
 private enum class AuthScreenState { CREATE_ACCOUNT, LOGIN, VERIFY }
 
@@ -28,7 +31,7 @@ fun AuthScreen(
     onLoginSuccess: () -> Unit
 ) {
     var currentState by remember { mutableStateOf(AuthScreenState.CREATE_ACCOUNT) }
-    var phoneNumber by remember { mutableStateOf("") } // Used to pass phone number to verify screen
+    var phoneNumber by remember { mutableStateOf("") }
 
     when (currentState) {
         AuthScreenState.CREATE_ACCOUNT -> {
@@ -45,7 +48,9 @@ fun AuthScreen(
             LoginScreen(
                 onCreateAccountClicked = { currentState = AuthScreenState.CREATE_ACCOUNT },
                 onSendOtpClicked = { phone ->
-                    // viewModel.loginUser(phone) // TODO: Implement in ViewModel
+                    // --- THIS IS THE FIX ---
+                    // This line is now active and will send the OTP
+                    viewModel.sendOtp(phone)
                     phoneNumber = phone
                     currentState = AuthScreenState.VERIFY
                 }
@@ -55,13 +60,15 @@ fun AuthScreen(
             VerifyScreen(
                 phoneNumber = phoneNumber,
                 onVerifyClicked = { otp ->
-                    // viewModel.verifyOtp(phone, otp) // TODO: Implement in ViewModel
-                    onLoginSuccess()
+                    viewModel.verifyOtp(phoneNumber, otp, onVerificationSuccess = onLoginSuccess)
                 }
             )
         }
     }
 }
+
+// ... The rest of the file (CreateAccountScreen, LoginScreen, VerifyScreen, etc.) is unchanged ...
+// For completeness, it's all included below.
 
 @Composable
 private fun CreateAccountScreen(

@@ -7,14 +7,17 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hackhawks.pashulens.R
@@ -23,8 +26,27 @@ import com.hackhawks.pashulens.ui.theme.PashuLensTheme
 
 @Composable
 fun SubmissionSuccessScreen(
+    type: String, // "submission" or "analysis"
     onReturnToDashboardClicked: () -> Unit
 ) {
+    // Determine content based on the 'type'
+    val title: String
+    val subtitle: String
+    val icon: ImageVector?
+    val imageRes: Int?
+
+    if (type == "analysis") {
+        title = "Results Accepted!"
+        subtitle = "Your analysis has been saved to your records"
+        icon = Icons.Default.CheckCircle
+        imageRes = null
+    } else { // Default to submission
+        title = "Successfully Submitted"
+        subtitle = "Your animal data has been successfully recorded."
+        icon = null
+        imageRes = R.drawable.donelogo // Your submission logo
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,16 +54,32 @@ fun SubmissionSuccessScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.donelogo), // Using your custom logo
-            contentDescription = "Submission Success",
-            modifier = Modifier.size(80.dp)
-        )
+        if (imageRes != null) {
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = title,
+                modifier = Modifier.size(80.dp)
+            )
+        } else if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color(0xFF4CAF50),
+                modifier = Modifier.size(80.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Successfully Submitted",
+            text = title,
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = subtitle,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -84,10 +122,18 @@ fun SubmissionSuccessScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Submission Success Preview")
 @Composable
 fun SubmissionSuccessScreenPreview() {
     PashuLensTheme {
-        SubmissionSuccessScreen {}
+        SubmissionSuccessScreen(type = "submission") {}
+    }
+}
+
+@Preview(name = "Analysis Success Preview")
+@Composable
+fun AnalysisSuccessScreenPreview() {
+    PashuLensTheme {
+        SubmissionSuccessScreen(type = "analysis") {}
     }
 }

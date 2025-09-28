@@ -2,32 +2,55 @@ package com.hackhawks.pashulens.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hackhawks.pashulens.network.LoginRequest
 import com.hackhawks.pashulens.network.RetrofitClient
 import com.hackhawks.pashulens.network.SignUpRequest
+import com.hackhawks.pashulens.network.VerifyRequest
 import kotlinx.coroutines.launch
-import java.lang.Exception
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class AuthViewModel : ViewModel() {
-
-    // 1. Get a reference to our ApiService from the RetrofitClient
+@HiltViewModel
+class AuthViewModel @Inject constructor() : ViewModel() {
     private val apiService = RetrofitClient.apiService
 
     fun signUpUser(name: String, phone: String, email: String?) {
         viewModelScope.launch {
-            // 2. Use a try/catch block to safely handle network errors
             try {
-                // 3. Create the request object with the user's data
                 val request = SignUpRequest(name = name, phone = phone, email = email)
-
-                // 4. Make the actual network call
-                val response = apiService.signUpUser(request)
-
-                // 5. If the call is successful, print the server's response
-                println("✅ SUCCESS: ${response.message}, User ID: ${response.userId}")
-
+                apiService.signUpUser(request)
+                sendOtp(phone)
             } catch (e: Exception) {
-                // 6. If the call fails, print the error message
-                println("❌ FAILURE: ${e.message}")
+                println("❌ SIGN UP FAILURE: ${e.message}")
+            }
+        }
+    }
+
+    fun sendOtp(phone: String) {
+        viewModelScope.launch {
+            try {
+                // --- NEW: Debug message ---
+                println("OTP_DEBUG: Requesting OTP for phone number: $phone")
+                val request = LoginRequest(phone = phone)
+                apiService.loginWithOtp(request)
+                println("✅ OTP SENT: Request sent for phone number $phone")
+            } catch (e: Exception) {
+                println("❌ OTP SEND FAILURE: ${e.message}")
+            }
+        }
+    }
+
+    fun verifyOtp(phone: String, otp: String, onVerificationSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                // --- NEW: Debug message ---
+                println("OTP_DEBUG: Verifying OTP for phone number: $phone")
+                val request = VerifyRequest(phone = phone, token = otp)
+                apiService.verifyOtp(request)
+                println("✅ VERIFICATION SUCCESS for $phone")
+                onVerificationSuccess()
+            } catch (e: Exception) {
+                println("❌ VERIFICATION FAILURE: ${e.message}")
             }
         }
     }

@@ -31,7 +31,7 @@ fun ScanScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { }, // Title is handled by the content now
+                title = { Text("New Scan") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -53,12 +53,11 @@ fun ScanScreen(
             Text(
                 text = "Type the animal identifier or start capturing photos",
                 color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp), // Added padding for word wrap
+                modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp),
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- CHANGED: Text field is now styled ---
             OutlinedTextField(
                 value = animalId,
                 onValueChange = { animalId = it },
@@ -81,7 +80,6 @@ fun ScanScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- CHANGED: Added icon to the button ---
             Button(
                 onClick = onStartCapture,
                 modifier = Modifier.fillMaxWidth(0.8f).height(56.dp),
