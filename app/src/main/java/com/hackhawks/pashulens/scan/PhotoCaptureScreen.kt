@@ -1,10 +1,6 @@
 package com.hackhawks.pashulens.scan
 
-import android.Manifest
-import android.content.Context
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -15,53 +11,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
-import coil.compose.AsyncImage
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.hackhawks.pashulens.ui.theme.DarkBlue
 import com.hackhawks.pashulens.ui.theme.PashuLensTheme
 import kotlinx.coroutines.launch
-import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoCaptureScreen(
-    viewModel: ScanViewModel,
     onBackClicked: () -> Unit,
     onNextClicked: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
-    var currentSlot by remember { mutableStateOf(CaptureSlotType.SIDE_VIEW) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    // --- Logic for Camera ---
-    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
-    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                viewModel.onImageCaptured(currentSlot, tempImageUri)
-            }
-        }
-    )
-
-    // --- Logic for Gallery ---
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            viewModel.onImageCaptured(currentSlot, uri)
-        }
-    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -77,31 +42,22 @@ fun PhotoCaptureScreen(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 CaptureSlot(
                     title = "Side View",
-                    imageUri = viewModel.capturedImages[CaptureSlotType.SIDE_VIEW],
-                    onCaptureClick = {
-                        currentSlot = CaptureSlotType.SIDE_VIEW
-                        showBottomSheet = true
-                    }
+                    imageUri = null, // No image in static prototype
+                    onCaptureClick = { showBottomSheet = true }
                 )
                 CaptureSlot(
                     title = "Front View",
-                    imageUri = viewModel.capturedImages[CaptureSlotType.FRONT_VIEW],
-                    onCaptureClick = {
-                        currentSlot = CaptureSlotType.FRONT_VIEW
-                        showBottomSheet = true
-                    }
+                    imageUri = null, // No image in static prototype
+                    onCaptureClick = { showBottomSheet = true }
                 )
                 CaptureSlot(
                     title = "Rear View",
-                    imageUri = viewModel.capturedImages[CaptureSlotType.REAR_VIEW],
-                    onCaptureClick = {
-                        currentSlot = CaptureSlotType.REAR_VIEW
-                        showBottomSheet = true
-                    }
+                    imageUri = null, // No image in static prototype
+                    onCaptureClick = { showBottomSheet = true }
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f)) // Pushes content below to the bottom
+            Spacer(modifier = Modifier.weight(1f))
 
             Card(
                 colors = CardDefaults.cardColors(containerColor = DarkBlue.copy(alpha = 0.1f)),
@@ -140,33 +96,17 @@ fun PhotoCaptureScreen(
                 ) {
                     Text("Capture Image", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(
-                        onClick = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion { showBottomSheet = false }
-                            if (cameraPermissionState.status.isGranted) {
-                                val uri = createImageUri(context)
-                                tempImageUri = uri
-                                cameraLauncher.launch(uri)
-                            } else {
-                                cameraPermissionState.launchPermissionRequest()
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = DarkBlue)
-                    ) {
+                    Button(onClick = { /* Does nothing in static prototype */ }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = DarkBlue)) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                         Text("Take Photo")
                     }
-                    OutlinedButton(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion { showBottomSheet = false }
-                        galleryLauncher.launch("image/*")
-                    }, modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(onClick = { /* Does nothing in static prototype */ }, modifier = Modifier.fillMaxWidth()) {
                         Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
                         Text("Choose From Gallery", color = DarkBlue)
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     TextButton(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion { showBottomSheet = false }
+                        scope.launch { sheetState.hide() }.invokeOnCompletion { if (!sheetState.isVisible) { showBottomSheet = false } }
                     }) {
                         Text("Cancel", color = Color.Red)
                     }
@@ -174,15 +114,6 @@ fun PhotoCaptureScreen(
             }
         }
     }
-}
-
-private fun createImageUri(context: Context): Uri {
-    val imageFile = File(context.filesDir, "camera_photo_${System.currentTimeMillis()}.jpg")
-    return FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        imageFile
-    )
 }
 
 @Composable
@@ -201,24 +132,23 @@ private fun CaptureSlot(title: String, imageUri: Uri?, onCaptureClick: () -> Uni
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                if (imageUri != null) {
-                    AsyncImage(
-                        model = imageUri,
-                        contentDescription = title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.Gray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = title, style = MaterialTheme.typography.labelMedium)
-                    }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.Gray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = title, style = MaterialTheme.typography.labelMedium)
                 }
             }
             Button(onClick = onCaptureClick, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraSmall) {
                 Text("Capture", style = MaterialTheme.typography.labelSmall)
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PhotoCaptureScreenPreview() {
+    PashuLensTheme {
+        PhotoCaptureScreen({}, {})
     }
 }

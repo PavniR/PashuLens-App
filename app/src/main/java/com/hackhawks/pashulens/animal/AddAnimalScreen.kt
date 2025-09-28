@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hackhawks.pashulens.ui.theme.DarkBlue
 import com.hackhawks.pashulens.ui.theme.PashuLensTheme
 
@@ -35,7 +34,6 @@ private val breedData = mapOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnimalScreen(
-    viewModel: AnimalViewModel,
     onBackClicked: () -> Unit,
     onSubmitSuccess: () -> Unit
 ) {
@@ -97,21 +95,7 @@ fun AddAnimalScreen(
             OutlinedTextField(value = lastVacDate, onValueChange = { lastVacDate = it }, label = { Text("Last Vaccination Date") }, modifier = Modifier.fillMaxWidth(), trailingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = "Select Date") })
             Spacer(modifier = Modifier.height(32.dp))
             Button(
-                onClick = {
-                    viewModel.addAnimal(
-                        tagId = tagId,
-                        animalName = "Cow", // You can update this to be a text field if needed
-                        species = selectedSpecies,
-                        breed = selectedBreed,
-                        gender = selectedGender,
-                        lactationStage = selectedLactation,
-                        weightKg = weight,
-                        ageMonths = age,
-                        farmId = farmId,
-                        status = selectedStatus,
-                        onSuccess = onSubmitSuccess
-                    )
-                },
+                onClick = onSubmitSuccess,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = DarkBlue)
             ) {
@@ -188,6 +172,6 @@ private fun PhotoUploadBox() {
 @Composable
 fun AddAnimalScreenPreview() {
     PashuLensTheme {
-        AddAnimalScreen(viewModel(), onBackClicked = {}, onSubmitSuccess = {})
+        AddAnimalScreen(onBackClicked = {}, onSubmitSuccess = {})
     }
 }
